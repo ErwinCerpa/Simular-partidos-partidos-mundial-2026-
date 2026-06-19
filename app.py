@@ -2,7 +2,11 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# 1. Definición de la Base de Datos (Global)
+# Configuración inicial
+st.set_page_config(page_title="Simulador Mundial 2026", layout="wide")
+st.title("⚽ Simulador Mundial 2026: Análisis Estadístico")
+
+# Base de datos y configuración igual que antes...
 data = {
     'Nombre': ['Mexico', 'Corea del Sur', 'Rep. Checa', 'Sudafrica', 'Argentina', 'Marruecos', 'Escocia', 'Bolivia', 'EEUU', 'Suiza', 'Nigeria', 'Panama', 'Brasil', 'Japon', 'Serbia', 'Australia', 'Francia', 'Colombia', 'Grecia', 'Canada', 'Inglaterra', 'Ecuador', 'Turquia', 'Argelia', 'Alemania', 'Chile', 'Islandia', 'Iran', 'España', 'Noruega', 'Ghana', 'Corea del Norte', 'Portugal', 'Dinamarca', 'Tunez', 'Honduras', 'Uruguay', 'Polonia', 'Costa Rica', 'Jamaica', 'Italia', 'Senegal', 'Paraguay', 'Austria', 'Croacia', 'Suecia', 'Egipto', 'Arabia Saudita'],
     'ELO': [8.2, 7.4, 7.1, 6.5, 9.5, 7.6, 6.8, 6.0, 8.0, 7.5, 7.0, 6.5, 9.3, 7.8, 7.2, 6.9, 9.6, 7.9, 6.9, 7.4, 9.2, 7.5, 7.1, 6.8, 9.0, 7.3, 6.7, 7.0, 9.1, 7.6, 6.9, 6.2, 8.9, 7.7, 6.8, 6.4, 8.5, 7.2, 6.8, 6.6, 8.7, 7.5, 7.0, 7.4, 8.3, 7.5, 7.1, 6.5],
@@ -12,7 +16,6 @@ data = {
 }
 df = pd.DataFrame(data)
 
-# Configuración de grupos
 grupos_data = {
     "A": ["Mexico", "Corea del Sur", "Rep. Checa", "Sudafrica"],
     "B": ["Argentina", "Marruecos", "Escocia", "Bolivia"],
@@ -28,28 +31,21 @@ grupos_data = {
     "L": ["Croacia", "Suecia", "Egipto", "Arabia Saudita"]
 }
 
-# Interfaz
-st.title("⚽ Simulador Mundial 2026")
-elo_w = st.sidebar.slider("Peso del ELO", 0.0, 1.0, 0.3, key="s1")
-tac_w = st.sidebar.slider("Peso Táctico", 0.0, 1.0, 0.3, key="s2")
-log_w = st.sidebar.slider("Peso Logístico", 0.0, 1.0, 0.2, key="s3")
-psi_w = st.sidebar.slider("Peso Psicológico", 0.0, 1.0, 0.2, key="s4")
-pesos = np.array([elo_w, tac_w, log_w, psi_w])
+# Sidebar
+st.sidebar.header("Configuración de Pesos")
+pesos = np.array([st.sidebar.slider(f"Peso {p}", 0.0, 1.0, v, key=p) for p, v in [("ELO", 0.3), ("Táctico", 0.3), ("Logístico", 0.2), ("Psicológico", 0.2)]])
 
 def simular_partido(n1, n2):
-    eq1 = df[df['Nombre'] == n1].iloc[0]
-    eq2 = df[df['Nombre'] == n2].iloc[0]
+    eq1, eq2 = df[df['Nombre'] == n1].iloc[0], df[df['Nombre'] == n2].iloc[0]
     delta = np.array([eq1['ELO']-eq2['ELO'], eq1['Tactico']-eq2['Tactico'], eq1['Logistica']-eq2['Logistica'], eq1['Psicologia']-eq2['Psicologia']])
-    prob = 1 / (1 + np.exp(-np.dot(delta, pesos)))
-    return n1 if np.random.rand() < prob else n2
+    return n1 if np.random.rand() < 1/(1+np.exp(-np.dot(delta, pesos))) else n2
 
-if st.button("📊 Ejecutar 1000 Simulaciones"):
+if st.button("📊 Ejecutar 1,000 Simulaciones"):
     conteo = {e: 0 for e in df['Nombre']}
     barra = st.progress(0)
     for sim in range(1000):
-        clasificados = []
-        lista_terceros = []
-        for letra, miembros in grupos_data.items():
+        clasificados, lista_terceros = [], []
+        for _, miembros in grupos_data.items():
             pts = {e: 0 for e in miembros}
             for i in range(len(miembros)):
                 for j in range(i+1, len(miembros)):
@@ -58,14 +54,18 @@ if st.button("📊 Ejecutar 1000 Simulaciones"):
             clasificados.extend([rank.index[0], rank.index[1]])
             lista_terceros.append((rank.index[2], pts[rank.index[2]]))
         clasificados.extend([t[0] for t in sorted(lista_terceros, key=lambda x: x[1], reverse=True)[:8]])
-        
         ronda = clasificados
         while len(ronda) > 1:
             ronda = [simular_partido(ronda[i], ronda[i+1]) for i in range(0, len(ronda), 2)]
         conteo[ronda[0]] += 1
-        if sim % 100 == 0: barra.progress(sim/1000)
+        barra.progress((sim + 1) / 1000)
     
-    res = pd.DataFrame(list(conteo.items()), columns=['Pais', 'Victorias'])
-    res['Probabilidad (%)'] = (res['Victorias'] / 100)
-    st.bar_chart(res.set_index('Pais'))
-    st.dataframe(res.sort_values(by='Probabilidad (%)', ascending=False))
+    # Reporte limpio
+    res = pd.DataFrame(list(conteo.items()), columns=['País', 'Victorias en Torneo'])
+    res['Probabilidad de Ganar (%)'] = (res['Victorias en Torneo'] / 10) # 1000 / 100 = 10
+    
+    # Gráfico mejorado
+    st.bar_chart(res.set_index('País')['Probabilidad de Ganar (%)'])
+    
+    # Tabla con formato correcto
+    st.dataframe(res.sort_values(by='Probabilidad de Ganar (%)', ascending=False).style.format({'Probabilidad de Ganar (%)': '{:.2f}%'}))
