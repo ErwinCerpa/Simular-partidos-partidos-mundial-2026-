@@ -6,7 +6,6 @@ import numpy as np
 st.set_page_config(page_title="Simulador Mundial 2026", layout="wide")
 st.title("⚽ Simulador Mundial 2026: Análisis Estadístico")
 
-# Base de datos y configuración igual que antes...
 data = {
     'Nombre': ['Mexico', 'Corea del Sur', 'Rep. Checa', 'Sudafrica', 'Argentina', 'Marruecos', 'Escocia', 'Bolivia', 'EEUU', 'Suiza', 'Nigeria', 'Panama', 'Brasil', 'Japon', 'Serbia', 'Australia', 'Francia', 'Colombia', 'Grecia', 'Canada', 'Inglaterra', 'Ecuador', 'Turquia', 'Argelia', 'Alemania', 'Chile', 'Islandia', 'Iran', 'España', 'Noruega', 'Ghana', 'Corea del Norte', 'Portugal', 'Dinamarca', 'Tunez', 'Honduras', 'Uruguay', 'Polonia', 'Costa Rica', 'Jamaica', 'Italia', 'Senegal', 'Paraguay', 'Austria', 'Croacia', 'Suecia', 'Egipto', 'Arabia Saudita'],
     'ELO': [8.2, 7.4, 7.1, 6.5, 9.5, 7.6, 6.8, 6.0, 8.0, 7.5, 7.0, 6.5, 9.3, 7.8, 7.2, 6.9, 9.6, 7.9, 6.9, 7.4, 9.2, 7.5, 7.1, 6.8, 9.0, 7.3, 6.7, 7.0, 9.1, 7.6, 6.9, 6.2, 8.9, 7.7, 6.8, 6.4, 8.5, 7.2, 6.8, 6.6, 8.7, 7.5, 7.0, 7.4, 8.3, 7.5, 7.1, 6.5],
@@ -60,12 +59,12 @@ if st.button("📊 Ejecutar 1,000 Simulaciones"):
         conteo[ronda[0]] += 1
         barra.progress((sim + 1) / 1000)
     
-    # Reporte limpio
+    # Reporte
     res = pd.DataFrame(list(conteo.items()), columns=['País', 'Victorias en Torneo'])
     res['Probabilidad de Ganar (%)'] = (res['Victorias en Torneo'] / 10) # 1000 / 100 = 10
     
     # Gráfico mejorado
     st.bar_chart(res.set_index('País')['Probabilidad de Ganar (%)'])
     
-    # Tabla con formato correcto
+    # Tabla con formato
     st.dataframe(res.sort_values(by='Probabilidad de Ganar (%)', ascending=False).style.format({'Probabilidad de Ganar (%)': '{:.2f}%'}))
