@@ -30,10 +30,10 @@ grupos_data = {
 
 # Interfaz
 st.title("⚽ Simulador Mundial 2026")
-elo_w = st.sidebar.slider("Peso ELO", 0.0, 1.0, 0.3, key="s1")
+elo_w = st.sidebar.slider("Peso del ELO", 0.0, 1.0, 0.3, key="s1")
 tac_w = st.sidebar.slider("Peso Táctico", 0.0, 1.0, 0.3, key="s2")
-log_w = st.sidebar.slider("Peso Logística", 0.0, 1.0, 0.2, key="s3")
-psi_w = st.sidebar.slider("Peso Psicología", 0.0, 1.0, 0.2, key="s4")
+log_w = st.sidebar.slider("Peso Logístico", 0.0, 1.0, 0.2, key="s3")
+psi_w = st.sidebar.slider("Peso Psicológico", 0.0, 1.0, 0.2, key="s4")
 pesos = np.array([elo_w, tac_w, log_w, psi_w])
 
 def simular_partido(n1, n2):
