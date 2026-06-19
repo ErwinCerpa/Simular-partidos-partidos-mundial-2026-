@@ -43,10 +43,10 @@ def simular_partido(n1, n2):
     prob = 1 / (1 + np.exp(-np.dot(delta, pesos)))
     return n1 if np.random.rand() < prob else n2
 
-if st.button("📊 Ejecutar 10,000 Simulaciones"):
+if st.button("📊 Ejecutar 1000 Simulaciones"):
     conteo = {e: 0 for e in df['Nombre']}
     barra = st.progress(0)
-    for sim in range(10000):
+    for sim in range(1000):
         clasificados = []
         lista_terceros = []
         for letra, miembros in grupos_data.items():
@@ -63,7 +63,7 @@ if st.button("📊 Ejecutar 10,000 Simulaciones"):
         while len(ronda) > 1:
             ronda = [simular_partido(ronda[i], ronda[i+1]) for i in range(0, len(ronda), 2)]
         conteo[ronda[0]] += 1
-        if sim % 100 == 0: barra.progress(sim/10000)
+        if sim % 100 == 0: barra.progress(sim/1000)
     
     res = pd.DataFrame(list(conteo.items()), columns=['Pais', 'Victorias'])
     res['Probabilidad (%)'] = (res['Victorias'] / 100)
